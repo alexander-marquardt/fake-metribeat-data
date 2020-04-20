@@ -46,6 +46,14 @@ ONE_THOUSAND = 1000
 BULK_SIZE = 1 * ONE_THOUSAND
 
 
+def get_cpu_spike_vars(curr_date):
+    cpu_spike_start = curr_date + CPU_SPIKE_EVERY_DAYS + datetime.timedelta(
+        days=random.uniform(-RANDOMIZE_SPIKE_DAYS, RANDOMIZE_SPIKE_DAYS))
+    cpu_spike_end = cpu_spike_start + SPIKE_DURATION_HOURS
+    cpu_spike_amount = random.uniform(-ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE, ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE)
+    return cpu_spike_start, cpu_spike_end, cpu_spike_amount
+
+
 def insert_fake_cpu_docs():
     es = Elasticsearch([ES_HOST], http_auth=(ES_USER, ES_PASSWORD))
 
@@ -57,7 +65,7 @@ def insert_fake_cpu_docs():
         'mappings': MAPPINGS,
     }
 
-    print(f"Deleting index {FAKE_METRICBEAT_INDEX_NAME}")
+    print(f"Creating index {FAKE_METRICBEAT_INDEX_NAME}")
     es.indices.create(index=FAKE_METRICBEAT_INDEX_NAME, body=request_body)
 
     # docs_for_bulk_insert - an array to collect documents for bulk insertion
@@ -67,10 +75,7 @@ def insert_fake_cpu_docs():
 
     print("%s Starting bulk insertion of documents\n" % datetime.datetime.now().isoformat())
     curr_date = START_DATE
-    cpu_spike_start = curr_date + CPU_SPIKE_EVERY_DAYS + datetime.timedelta(
-        days=random.uniform(-RANDOMIZE_SPIKE_DAYS, RANDOMIZE_SPIKE_DAYS))
-    cpu_spike_end = cpu_spike_start + SPIKE_DURATION_HOURS
-    cpu_spike_amount =  random.uniform(-ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE, ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE)
+    cpu_spike_start, cpu_spike_end, cpu_spike_amount = get_cpu_spike_vars(curr_date)
 
     while curr_date <= TODAY_DATE:
 
@@ -80,10 +85,7 @@ def insert_fake_cpu_docs():
             cpu_val = CPU_NORMAL_VALUE + random.uniform(-CPU_VARIANCE, CPU_VARIANCE)
 
             if cpu_spike_start < curr_date:
-                cpu_spike_start = curr_date + CPU_SPIKE_EVERY_DAYS + datetime.timedelta(
-                    days=random.uniform(-RANDOMIZE_SPIKE_DAYS, RANDOMIZE_SPIKE_DAYS))
-                cpu_spike_end = cpu_spike_start + SPIKE_DURATION_HOURS
-                cpu_spike_amount = random.uniform(-ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE, ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE)
+                cpu_spike_start, cpu_spike_end, cpu_spike_amount = get_cpu_spike_vars(curr_date)
 
         action = {
             '_index': FAKE_METRICBEAT_INDEX_NAME,
