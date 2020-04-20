@@ -3,15 +3,13 @@ import datetime
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 
-
 NUMBER_OF_DAYS_TO_INSERT =100
 TODAY_DATE = datetime.datetime.now()
 START_DATE = TODAY_DATE - datetime.timedelta(days=NUMBER_OF_DAYS_TO_INSERT)
 TIME_BETWEEN_INSERTS = datetime.timedelta(seconds=15)
-CPU_SPIKE_EVERY_DAYS = datetime.timedelta(days=25)
-RANDOMIZE_SPIKE_HOURS = 120 # move the spike forward and backward in time
+CPU_SPIKE_EVERY_DAYS = datetime.timedelta(days=20)
+RANDOMIZE_SPIKE_DAYS = 20  # move the spike forward and backward in time by a random amount
 SPIKE_DURATION_HOURS = datetime.timedelta(hours=96) # hours
-
 
 ES_HOST = 'localhost:9200'
 ES_USER = 'elastic'
@@ -19,9 +17,9 @@ ES_PASSWORD = 'elastic'
 
 FAKE_METRICBEAT_INDEX_NAME = "fake-metricbeat-idx"
 CPU_FIELDNAME = "system.cpu.total.pct"
-CPU_NORMAL_VALUE = 1.60 # 160 %
-CPU_HIGH_VALUE = 3.50
-CPU_VARIANCE = 0.4 # plus or minus
+CPU_NORMAL_VALUE = 2 # 160 %
+ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE = 1  # add from zero to this value
+CPU_VARIANCE = 0.5  # plus or minus
 
 
 SETTINGS = {
@@ -70,20 +68,22 @@ def insert_fake_cpu_docs():
     print("%s Starting bulk insertion of documents\n" % datetime.datetime.now().isoformat())
     curr_date = START_DATE
     cpu_spike_start = curr_date + CPU_SPIKE_EVERY_DAYS + datetime.timedelta(
-        hours=random.uniform(-RANDOMIZE_SPIKE_HOURS, RANDOMIZE_SPIKE_HOURS))
+        days=random.uniform(-RANDOMIZE_SPIKE_DAYS, RANDOMIZE_SPIKE_DAYS))
     cpu_spike_end = cpu_spike_start + SPIKE_DURATION_HOURS
+    cpu_spike_amount =  random.uniform(-ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE, ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE)
 
     while curr_date <= TODAY_DATE:
 
         if cpu_spike_start < curr_date < cpu_spike_end:
-            cpu_val = CPU_HIGH_VALUE + random.uniform(-CPU_VARIANCE, CPU_VARIANCE)
+            cpu_val = CPU_NORMAL_VALUE + cpu_spike_amount + random.uniform(-CPU_VARIANCE, CPU_VARIANCE)
         else:
             cpu_val = CPU_NORMAL_VALUE + random.uniform(-CPU_VARIANCE, CPU_VARIANCE)
 
             if cpu_spike_start < curr_date:
                 cpu_spike_start = curr_date + CPU_SPIKE_EVERY_DAYS + datetime.timedelta(
-                    hours=random.uniform(-RANDOMIZE_SPIKE_HOURS, RANDOMIZE_SPIKE_HOURS))
+                    days=random.uniform(-RANDOMIZE_SPIKE_DAYS, RANDOMIZE_SPIKE_DAYS))
                 cpu_spike_end = cpu_spike_start + SPIKE_DURATION_HOURS
+                cpu_spike_amount = random.uniform(-ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE, ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE)
 
         action = {
             '_index': FAKE_METRICBEAT_INDEX_NAME,
