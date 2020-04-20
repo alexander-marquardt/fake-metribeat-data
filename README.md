@@ -2,4 +2,4 @@
 Generate metricbeat data that can be used for graph, ML, and/or rollup demos
 
 
-![Example](https://github.com/alexander-marquardt/fake-metribeat-data/blob/master/example-data.png){:height="90%" width="90%"}
+![Example](https://github.com/alexander-marquardt/fake-metribeat-data/blob/master/example-data.png)
