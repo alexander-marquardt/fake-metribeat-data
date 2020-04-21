@@ -17,7 +17,7 @@ ES_PASSWORD = 'elastic'
 
 FAKE_METRICBEAT_INDEX_NAME = "fake-metricbeat-idx"
 CPU_FIELDNAME = "system.cpu.total.pct"
-CPU_NORMAL_VALUE = 2 # 160 %
+CPU_NORMAL_VALUE = 2 # 200%
 ADD_RANDOM_TO_CPU_FOR_HIGH_VALUE = 1  # add from zero to this value
 CPU_VARIANCE = 0.5  # plus or minus
 
@@ -32,7 +32,7 @@ SETTINGS = {
 
 MAPPINGS = {
     'properties': {
-        'timestamp': {
+        '@timestamp': {
             'type': 'date'
         },
         CPU_FIELDNAME: {
@@ -92,7 +92,7 @@ def insert_fake_cpu_docs():
             '_id': None,
             '_source': {
                 CPU_FIELDNAME: '%s' % cpu_val,
-                'timestamp': curr_date
+                '@timestamp': curr_date
                 }
             }
         docs_for_bulk_insert.append(action)
