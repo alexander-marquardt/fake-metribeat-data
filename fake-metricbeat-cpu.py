@@ -6,7 +6,7 @@ from elasticsearch import helpers
 NUMBER_OF_DAYS_TO_INSERT =100
 TODAY_DATE = datetime.datetime.now()
 START_DATE = TODAY_DATE - datetime.timedelta(days=NUMBER_OF_DAYS_TO_INSERT)
-TIME_BETWEEN_INSERTS = datetime.timedelta(seconds=15)
+TIME_BETWEEN_INSERTS = datetime.timedelta(seconds=10)
 CPU_SPIKE_EVERY_DAYS = datetime.timedelta(days=20)
 RANDOMIZE_SPIKE_DAYS = 20  # move the spike forward and backward in time by a random amount
 SPIKE_DURATION_HOURS = datetime.timedelta(hours=96) # hours
