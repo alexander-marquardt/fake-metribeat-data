@@ -73,7 +73,7 @@ def insert_fake_cpu_docs():
     # bulk_counter - track how many documents are in the actions array
     bulk_counter = 0
 
-    print("%s Starting bulk insertion of documents\n" % datetime.datetime.now().isoformat())
+    print("Bulk inserting from %s to %s\n" % (START_DATE, TODAY_DATE))
     curr_date = START_DATE
     cpu_spike_start, cpu_spike_end, cpu_spike_amount = get_cpu_spike_vars(curr_date)
 
